@@ -1,0 +1,35 @@
+This is a playground to test code. It runs a full Node.js environment and already has all of npm’s 1,000,000+ packages pre-installed, including ghost. Try it out:
+var ghost = require("ghost")
+TypeErrorStack Trace Viewer
+Stack Trace Viewer
+TypeError: Cannot read property 'connection' of undefined
+at exports.Provider.sanitizeDatabaseProperties in ghost/core/shared/config/utils.js — line 103
+ if (this.get('database:client') === 'mysql') {
+        delete database.connection.filename;
+    } else {
+        delete database.connection.host;
+        delete database.connection.user;
+        delete database.connection.password;
+        delete database.connection.database;
+\at Object.loadNconf in ghost/core/shared/config/index.js — line 52
+ in ghost/core/shared/config/index.js — line 83
+at Module._compile in core internal/modules/cjs/loader.js — line 1063
+at Module._extensions..js in core internal/modules/cjs/loader.js — line 1092
+at Module.load in core internal/modules/cjs/loader.js — line 928
+at Module._load in core internal/modules/cjs/loader.js — line 769
+at Module.require in core internal/modules/cjs/loader.js — line 952
+at require in core internal/modules/cjs/helpers.js — line 88
+ in ghost/core/server/overrides.js — line 1
+at Module._compile in core internal/modules/cjs/loader.js — line 1063
+at Module._extensions..js in core internal/modules/cjs/loader.js — line 1092
+at Module.load in core internal/modules/cjs/loader.js — line 928
+at Module._load in core internal/modules/cjs/loader.js — line 769
+at Module.require in core internal/modules/cjs/loader.js — line 952
+at require in core internal/modules/cjs/helpers.js — line 88
+ in ghost/core/server/index.js — line 10
+at Module._compile in core internal/modules/cjs/loader.js — line 1063
+all documents on RunKit are public
+require() any package directly from npm
+use arrow functions, classes, template strings, and most of ES6
+await any promise instead of using callbacks (example)
+create your own embedded node.js snippets
