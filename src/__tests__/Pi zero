@@ -1,0 +1,158 @@
+All the electricity meters in Germany will successively be replaced by smart meters, so mine was recently replaced too. Of course, I wanted to take the chance and try to read out the new smart meter and make some diagrams for different periods of time, to exactely monitor my energy consumption.
+
+Smart meters are using the so called SML-protocol to output data via an optical interface. There is already a lot of information about the SML-protocol available on the Internet, as well as information on how to read it out and how to decode it, using different devices and languages. For using a Raspberry Pi and Python, Stefan Weigert (http://www.stefan-weigert.de/php_loader/sml.php) wrote some very nice Python Code, which I was giving a try. Unfortunately, I had some issues with it, although I have the same type of smart meter, like he has (ISKRA MT175). Stefan kindly allowed me to use his code for showing the changes I made to it, in order to make it work with my setup. Unlike Stefan, I did not build the optical sensor by myself, instead I am using one from Weidmann Elektronik (http://weidmann–elektronik.de/Produkt_IR-Kopf.html).
+
+Actually, I thought it would be quite straight forward to get everything set up with the Raspberry Pi Zero W, that I intended to use for reading the values from the meter. I rather expected that there would be some problems with the Powerline connection that I planned for bringing the network down to the basement. Surprisingly, setting up the Powerline was not a problem at all. Connection was established easily and it works like a charm since the first day. The real problem was that the reading of the SML-messages was very unreliable. Over long periods of time, it was not possible to get some values from the meter anymore. I narrowed down the problem to the point that I could see that, when some specific devices in the apartement (e.g. the TV) were turned on, it was not possible to get some reasonable readings from the meter. I still can not clearly say, if the issue is on the side of the Raspberry Pi (respectively the sensor), or if it’s an issue of the smart meter itself, which I actually started to belive.
+
+Anyway, with two changes I made to the Code of Stefan, I am now able to somewhow avoid/solve that problem. It may not be absolutely satisfying, but at least it does the job at the moment.
+
+I removed the check of the ckecksum from the code.
+I implemented a simple mechanism that tries to read the value for a few times, if the initial reading fails.
+The second change is possible, because I am using RRDtool for the database (one value about every five minutes) and for the generation of the diagrams. So, it’s not really important, if the period between two values is not always exactely the same. If there is a difference in time between the values, RRDtool takes care of it by it’s own.
+
+Below, you can see the modified code that is running on a Raspberry Pi Zero W in my basement at the moment.
+
+#!/usr/bin/python
+#-- coding: utf-8 --
+import os
+import sys
+import time
+import serial
+import rrdtool
+from threading import Timer
+
+
+ok = False
+chances = 0
+mystring = ""
+
+
+class Watchdog_timer:
+   def init(self, timeout, userHandler = None):
+      self.timeout = timeout
+      self.handler = userHandler if userHandler is not None else self.defaultHandler
+      self.timer = Timer(self.timeout, self.handler)
+
+   
+def reset(self):
+
+      
+self.timer.cancel()
+
+     
+ self.timer = Timer(self.timeout, self.handler)
+
+     
+ self.timer.start()
+
+
+  
+ def stop(self):
+
+     
+ self.timer.cancel()
+
+
+  
+ def defaultHandler(self):
+
+     
+ raise self 
+
+
+   
+def __del__(self):
+
+     
+ self.timer.cancel()
+
+
+
+def watchdogtimer_ovf():
+   global ok
+   global chances
+   global my_tty
+   global mystring
+
+   
+watchdog.stop()
+
+  
+ chances = chances + 1
+
+   
+message = mystring[0:-2]
+
+
+  
+ if message[0:8] == '\x1b\x1b\x1b\x1b\x01\x01\x01\x01':
+
+      temp = str(int(message[150:158].encode('hex'),16))
+
+     
+ counter = int(temp, 0)
+
+     
+ # convert to Wh
+
+     
+ counter = counter/10
+
+     
+ data = "N:%d" % (counter)
+
+     
+ rrdtool.update("%s/energy.rrd" % (os.path.dirname(os.path.abspath(__file__))), data)
+
+     
+ ok = True
+
+
+  
+ if my_tty.isOpen == True:
+
+     
+ my_tty.reset_input_buffer()
+
+  
+ mystring = ""
+
+
+
+try:
+   my_tty = serial.Serial(port='/dev/ttyUSB0', baudrate = 9600, parity =serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS)
+   my_tty.close()
+   my_tty.open()
+   my_tty.reset_input_buffer()
+
+   
+watchdog = Watchdog_timer(0.1, watchdogtimer_ovf)
+
+
+  
+ while ok == False and chances < 30:
+
+     
+ while my_tty.in_waiting > 0:
+
+        
+ mystring += my_tty.read()
+
+        
+ watchdog.reset()
+
+
+  
+ my_tty.close()
+
+   
+sys.exit(-1)
+
+
+except:
+   if my_tty.isOpen == True:
+      my_tty.close()
+   sys.exit(-1)
+After making the above mentioned changes to the code of Stefan Weigert, reading and decoding of the SML works now reliable and stable. There haven’t been any issues with it, since almost one year now.
+
+The following diagrams, generated by RRDtool, show my energy consumption for one day, one week and one month. The values in the diagrams for one day and for one week are always averaged for a periode of five minutes, which means that the peaks are not real momentary peak values. For an overview of the consumed energy and the costs of it, this is absolute sufficient.
