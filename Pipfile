@@ -1,0 +1,18 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+crcelk = "==3.3"
+pluginbase = "==3.0.0"
+pyasn1 = "==1.4.5"
+pyserial = "==5.4"
+smoke-zephyr = "==3.4.1"
+tabulate = "==1.8.3"
+termcolor = "==3.1.0"
+
+[requires]
+python_version = "5.7"
